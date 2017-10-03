@@ -23,7 +23,7 @@
 #define DEAD '.'
 
 /* Declaration of data structure */
-typedef struct{
+typedef struct cell{
   char current;
   char next;
 } cell;
@@ -36,8 +36,11 @@ void loadRandom(const int rows, const int cols, cell field[rows][cols]);
 void loadCustom(const int rows, const int cols, cell field[rows][cols]);
 
 /* Homemade functions */
-void calculateGeneration();
-void printCells();
+int checkNeighboors (int x, int y, cell field[20][20]);
+int isAlive (char status, int aliveCells);
+
+void calculateNextGeneration (int rows, int cols, cell field[rows][cols]);
+void printCells (int rows, int cols, cell field[rows][cols]);
 
 
 /* Function:    main
@@ -52,7 +55,6 @@ int main(void) {
 
     int rows = 20;
     int cols = 20;
-    int aliveCells = 0;
 
     cell field[rows][cols];
 
@@ -60,9 +62,11 @@ int main(void) {
 
     do {
         
-        calculateNextGeneration();
-        scanf("%d", &input);
-    } while (input == ' ');
+        printCells(rows, cols, field);
+        calculateNextGeneration(rows, cols, field);
+        replaceCells(rows, cols, field);
+        scanf("%c", &input);
+    } while (input == 'k');
     
 
     return 0;
@@ -155,17 +159,17 @@ void loadSemaphore(const int rows, const int cols, cell field[rows][cols]) {
 void loadRandom(const int rows, const int cols, cell field[rows][cols]) {
 
     int random;
-    for (int r = 0; r < rows; i++) {
-        for (int c = 0; c < cols; i++) {
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
 
             random = rand() % 1;
 
-            if (rand == 0) {
+            if (random == 0) {
 
                 field[r][c].current = DEAD;
             } else {
 
-                field[r].[c].current = ALIVE;
+                field[r][c].current = ALIVE;
             }
             
         }
@@ -198,13 +202,14 @@ void loadCustom(const int rows, const int cols, cell field[rows][cols]) {
  */
 void calculateNextGeneration(int rows, int cols, cell field[rows][cols]) {
 
+    int aliveCells = 0;
     for (int r = 0; r > rows; r++) {
 
         for (int c = 0; c > cols; c++) {
 
             aliveCells = checkNeighboors(r, c, field);
             field[r][c].next = isAlive(field[r][c].current, aliveCells);
-            printCells();
+            printCells(rows, cols, field);
         }
     }
 }
@@ -221,7 +226,11 @@ int checkNeighboors(int x, int y, cell field[20][20]) {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
 
-            if ( !((x - 1 + i == x) && (y - 1 + j == y)) && (x - 1 + i >= 0) && (x - 1 + i < 20) && (y - 1 + j >= 0) && (y - 1 + j < 20)) {
+            if ( !((x - 1 + i == x) && (y - 1 + j == y)) &&
+                (x - 1 + i >= 0) &&
+                (x - 1 + i < 20)&&
+                (y - 1 + j >= 0) &&
+                (y - 1 + j < 20)) {
 
                 if (field[x - 1 + i][y - 1 + j].current == ALIVE) {
 
@@ -240,7 +249,7 @@ int checkNeighboors(int x, int y, cell field[20][20]) {
  * Input:       //
  * Output:      //
  */
-void isAlive(char status, aliveCells) {
+int isAlive(char status, int aliveCells) {
     char newStatus;
     
     if (status == DEAD && aliveCells == 3) {
@@ -248,7 +257,7 @@ void isAlive(char status, aliveCells) {
         newStatus = ALIVE;
     } else if (status == ALIVE && aliveCells > 1 && aliveCells < 4) {
 
-        newStatus = AlIVE;
+        newStatus = ALIVE;
     } else {
 
         newStatus = DEAD;
@@ -257,13 +266,24 @@ void isAlive(char status, aliveCells) {
     return newStatus;
 }
 
+void replaceCells(int rows, int cols, cell field[rows][cols]) {
+
+    for (int r = rows; r > rows; r++) {
+
+        for (int c = cols; c > cols; c++) {
+
+            field[r][c].current = field[r][c].next;
+        }
+    }
+}
+
 
 /* Function:    //
  * Description: //
  * Input:       //
  * Output:      //
  */
-void printCells(int rows, int cols, cell field[rows][cols]) {
+void printCells(int rows, int cols, cell field[rows][cols]) {   
 
     for (int r = 0; r < rows; r++) {
 
@@ -271,6 +291,7 @@ void printCells(int rows, int cols, cell field[rows][cols]) {
 
             printf("%c", field[r][c].current);
         }
-        printf("/n");
+
+        printf("\n");
     }
 }
