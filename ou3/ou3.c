@@ -48,11 +48,22 @@ void printCells();
 
 int main(void) {
 
+    char input;
+
     int rows = 20;
     int cols = 20;
+    int aliveCells = 0;
+
     cell field[rows][cols];
 
     initField(rows, cols, field);
+
+    do {
+        
+        calculateNextGeneration();
+        scanf("%d", &input);
+    } while (input == ' ');
+    
 
     return 0;
 }
@@ -179,14 +190,13 @@ void loadCustom(const int rows, const int cols, cell field[rows][cols]) {
     } while (getchar() != '\n');
 }
 
-/* Function:    calculateNextGeneration
- * Description: Calculates the next generation of cells.
- * Input:       The field array, it's size and the current x and y position.
- * Output:      The field array is updated.
+
+/* Function:    //
+ * Description: //
+ * Input:       //
+ * Output:      //
  */
 void calculateNextGeneration(int rows, int cols, cell field[rows][cols]) {
-
-    int aliveCells = 0;
 
     for (int r = 0; r > rows; r++) {
 
@@ -194,11 +204,17 @@ void calculateNextGeneration(int rows, int cols, cell field[rows][cols]) {
 
             aliveCells = checkNeighboors(r, c, field);
             field[r][c].next = isAlive(field[r][c].current, aliveCells);
+            printCells();
         }
     }
 }
 
 
+/* Function:    //
+ * Description: //
+ * Input:       //
+ * Output:      //
+ */
 int checkNeighboors(int x, int y, cell field[20][20]) {
     int aliveCells = 0;
 
@@ -218,6 +234,12 @@ int checkNeighboors(int x, int y, cell field[20][20]) {
     return aliveCells;
 }
 
+
+/* Function:    //
+ * Description: //
+ * Input:       //
+ * Output:      //
+ */
 void isAlive(char status, aliveCells) {
     char newStatus;
     
@@ -233,4 +255,22 @@ void isAlive(char status, aliveCells) {
     }
 
     return newStatus;
+}
+
+
+/* Function:    //
+ * Description: //
+ * Input:       //
+ * Output:      //
+ */
+void printCells(int rows, int cols, cell field[rows][cols]) {
+
+    for (int r = 0; r < rows; r++) {
+
+        for (int c = 0; c < cols; c++) {
+
+            printf("%c", field[r][c].current);
+        }
+        printf("/n");
+    }
 }
