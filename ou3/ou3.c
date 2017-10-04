@@ -2,7 +2,6 @@
  * Programmeringsteknik med C och Matlab
  * Fall 17
  * Assignment 3
-
  * File:         ou3.c
  * Description:  A simple implementation of Conway's Game of Life.
  * Author:
@@ -35,12 +34,13 @@ void loadSemaphore(const int rows, const int cols, cell field[rows][cols]);
 void loadRandom(const int rows, const int cols, cell field[rows][cols]);
 void loadCustom(const int rows, const int cols, cell field[rows][cols]);
 
-/* Homemade functions */
-int checkNeighboors (int x, int y, cell field[20][20]);
+/* My (Buster) functions */
+int checkNeighboors (const int rows, const int cols, int x, int y, cell field[20][20]);
 int isAlive (char status, int aliveCells);
 
-void calculateNextGeneration (int rows, int cols, cell field[rows][cols]);
-void printCells (int rows, int cols, cell field[rows][cols]);
+void calculateNextGeneration (const int rows, const int cols, cell field[rows][cols]);
+void replaceCells (const int rows, const int cols, cell field[rows][cols]);
+void printCells (const int rows, const int cols, cell field[rows][cols]);
 
 
 /* Function:    main
@@ -51,11 +51,13 @@ void printCells (int rows, int cols, cell field[rows][cols]);
 
 int main(void) {
 
-    char input;
-
+    char userInput;
+	
+	//rows and cols are hardcoded, but can easily be changed
     int rows = 20;
     int cols = 20;
-
+	
+	//Initiates field array witch size of rows and cols
     cell field[rows][cols];
 
     initField(rows, cols, field);
@@ -65,8 +67,13 @@ int main(void) {
         printCells(rows, cols, field);
         calculateNextGeneration(rows, cols, field);
         replaceCells(rows, cols, field);
-        scanf("%c", &input);
-    } while (input == 'k');
+		
+		printf("Select one of the following options:\n");
+		printf("        (enter) Step\n");
+		printf("        (any)   Exit\n");
+        scanf("%c", &userInput);
+		
+    } while (userInput == '\n');
     
 
     return 0;
@@ -162,16 +169,10 @@ void loadRandom(const int rows, const int cols, cell field[rows][cols]) {
     for (int r = 0; r < rows; r++) {
         for (int c = 0; c < cols; c++) {
 
-            random = rand() % 1;
-
-            if (random == 0) {
-
-                field[r][c].current = DEAD;
-            } else {
-
-                field[r][c].current = ALIVE;
-            }
-            
+            random = rand() % 2;
+            if (random == 1) {
+				field[r][c].current = ALIVE;
+			}
         }
     }
 }
@@ -195,69 +196,83 @@ void loadCustom(const int rows, const int cols, cell field[rows][cols]) {
 }
 
 
-/* Function:    //
- * Description: //
- * Input:       //
- * Output:      //
+/* Function:    calculateNextGeneration
+ * Description: Calculates the next generation of cells compared to current one
+ * Input:       The field array and it's size
+ * Output:      Points back to cells in field array and change value to
+				either DEAD or ALIVE
  */
-void calculateNextGeneration(int rows, int cols, cell field[rows][cols]) {
-
+void calculateNextGeneration(const int rows, const int cols, cell field[rows][cols]) {
+	
     int aliveCells = 0;
-    for (int r = 0; r > rows; r++) {
+    for (int r = 0; r < rows; r++) {
 
-        for (int c = 0; c > cols; c++) {
+        for (int c = 0; c < cols; c++) {
 
-            aliveCells = checkNeighboors(r, c, field);
+            aliveCells = checkNeighboors(rows, cols, r, c, field);
             field[r][c].next = isAlive(field[r][c].current, aliveCells);
-            printCells(rows, cols, field);
         }
     }
 }
 
 
-/* Function:    //
- * Description: //
- * Input:       //
- * Output:      //
+/* Function:    checkNeighboors
+ * Description: Check the neighboors of current cell so see how many are alive.
+ * Input:       Current cell x and y position, field array and it's lengh
+ * Output:      Return int of how many cell neighboors are alive
  */
-int checkNeighboors(int x, int y, cell field[20][20]) {
+int checkNeighboors(const int rows, const int cols, int x, int y, cell field[rows][cols]) {
+	
     int aliveCells = 0;
+	
+	//2 for loops, looping through the 9 cells (including current) that
+	//are around current one.
+    for (int r = 0; r < 3; r++) {
+        for (int c = 0; c < 3; c++) {
 
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-
-            if ( !((x - 1 + i == x) && (y - 1 + j == y)) &&
-                (x - 1 + i >= 0) &&
-                (x - 1 + i < 20)&&
-                (y - 1 + j >= 0) &&
-                (y - 1 + j < 20)) {
-
-                if (field[x - 1 + i][y - 1 + j].current == ALIVE) {
+			//Checks that cell is not the current cell
+            if ( !((x - 1 + r == x) && (y - 1 + c == y)) &&
+			//Checks that cell is defined within array:
+			// 0 >= x < number of rows
+			// 0 >= y < number of cols
+                (x - 1 + r >= 0) &&
+                (x - 1 + r < rows)&&
+                (y - 1 + c >= 0) &&
+                (y - 1 + c < cols)) {
+				
+                if (field[x - 1 + r][y - 1 + c].current == ALIVE) {
 
                     aliveCells = aliveCells + 1;
                 }
             }
         }
     }
-
+	
     return aliveCells;
 }
 
 
-/* Function:    //
- * Description: //
- * Input:       //
- * Output:      //
+/* Function:    isAlive
+ * Description: Checks wheather or not cell will live to the next generation
+ * Input:       Current status of cell (dead/alive), how many living neighboors
+				it has
+ * Output:      Returns status of DEAD or ALIVE
  */
 int isAlive(char status, int aliveCells) {
+	
     char newStatus;
     
+	//Dead cells -> ALIVE
     if (status == DEAD && aliveCells == 3) {
 
         newStatus = ALIVE;
+	
+	//Alive cells -> ALIVE
     } else if (status == ALIVE && aliveCells > 1 && aliveCells < 4) {
-
+		
         newStatus = ALIVE;
+		
+	//Dead and alive cells -> DEAD
     } else {
 
         newStatus = DEAD;
@@ -266,22 +281,29 @@ int isAlive(char status, int aliveCells) {
     return newStatus;
 }
 
-void replaceCells(int rows, int cols, cell field[rows][cols]) {
 
-    for (int r = rows; r > rows; r++) {
+/* Function:    replaceCells
+ * Description: Replacing the old generation of cells with new calculation
+				each "current" cell is replaced with "next" cell
+ * Input:       The field array and its size
+ * Output:      Points back to array and changes value
+ */
+void replaceCells(const int rows, const int cols, cell field[rows][cols]) {
+	
+    for (int r = 0; r < rows; r++) {
 
-        for (int c = cols; c > cols; c++) {
-
+        for (int c = 0; c < cols; c++) {
+			
             field[r][c].current = field[r][c].next;
         }
     }
 }
 
 
-/* Function:    //
- * Description: //
- * Input:       //
- * Output:      //
+/* Function:    printCellls
+ * Description: Prints alive and dead cells on screen
+ * Input:       The field array and its size
+ * Output:      None
  */
 void printCells(int rows, int cols, cell field[rows][cols]) {   
 
@@ -289,7 +311,7 @@ void printCells(int rows, int cols, cell field[rows][cols]) {
 
         for (int c = 0; c < cols; c++) {
 
-            printf("%c", field[r][c].current);
+            printf("%c ", field[r][c].current);
         }
 
         printf("\n");
